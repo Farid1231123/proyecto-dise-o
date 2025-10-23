@@ -1,0 +1,2091 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Municipal Huancayo - Trámites en Línea</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--gray-800);
+        }
+
+        /* HEADER */
+        .header {
+            background: white;
+            box-shadow: var(--shadow-lg);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .header-title p {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--gray-300);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .lang-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: var(--gray-50);
+            border-radius: 8px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* TABS NAVIGATION */
+        .tabs-nav {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            overflow-x: auto;
+        }
+
+        .tabs-nav::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .tabs-nav::-webkit-scrollbar-thumb {
+            background: var(--gray-300);
+            border-radius: 3px;
+        }
+
+        .tabs-list {
+            display: flex;
+            gap: 0.5rem;
+            min-width: max-content;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: var(--gray-100);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--gray-600);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            background: var(--gray-200);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* TAB CONTENT */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* CARDS */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: var(--gray-800);
+            font-weight: 600;
+        }
+
+        /* FORMS */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--gray-700);
+            font-size: 0.9rem;
+        }
+
+        .form-label.required::after {
+            content: ' *';
+            color: var(--danger);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* FILE UPLOAD */
+        .file-upload-area {
+            border: 2px dashed var(--gray-300);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--primary);
+            background: var(--gray-50);
+        }
+
+        .file-upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(30, 64, 175, 0.05);
+        }
+
+        .file-list {
+            margin-top: 1rem;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--gray-50);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-processing { background: #dbeafe; color: #1e40af; }
+        .badge-completed { background: #d1fae5; color: #065f46; }
+        .badge-rejected { background: #fee2e2; color: #991b1b; }
+
+        /* TABLE */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background: var(--gray-50);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-700);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .table tr:hover {
+            background: var(--gray-50);
+        }
+
+        /* STATS CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-info h3 {
+            font-size: 2rem;
+            color: var(--gray-800);
+        }
+
+        .stat-info p {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+        }
+
+        /* PROGRESS BAR */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+
+        /* TIMELINE */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--gray-300);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.5rem;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* TOAST NOTIFICATIONS */
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 3000;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.5rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            min-width: 300px;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast-success { border-left: 4px solid var(--secondary); }
+        .toast-error { border-left: 4px solid var(--danger); }
+        .toast-warning { border-left: 4px solid var(--warning); }
+        .toast-info { border-left: 4px solid var(--info); }
+
+        /* ACCESSIBILITY */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            border: 0;
+        }
+
+        /* HIGH CONTRAST MODE */
+        body.high-contrast {
+            --primary: #000080;
+            --gray-800: #000000;
+            background: #ffffff;
+        }
+
+        body.high-contrast .card {
+            border: 2px solid #000000;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .user-section {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        /* LOADING SPINNER */
+        .spinner {
+            border: 3px solid var(--gray-200);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* SKELETON LOADER */
+        .skeleton {
+            background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-300) 50%, var(--gray-200) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-text {
+            height: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .skeleton-title {
+            height: 1.5rem;
+            width: 60%;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">MH</div>
+                <div class="header-title">
+                    <h1>Municipalidad de Huancayo</h1>
+                    <p>Sistema de Trámites Documentarios</p>
+                </div>
+            </div>
+            <div class="user-section">
+                <!-- HU-024: Interfaz multilingüe -->
+                <div class="lang-switch">
+                    <button class="lang-btn active" data-lang="es" aria-label="Español">ES</button>
+                    <button class="lang-btn" data-lang="qu" aria-label="Quechua">QU</button>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">JD</div>
+                    <div>
+                        <strong>Juan Delgado</strong>
+                        <p style="font-size: 0.75rem; color: var(--gray-600);">DNI: 12345678</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+        <!-- TABS NAVIGATION -->
+        <nav class="tabs-nav" role="tablist">
+            <div class="tabs-list">
+                <button class="tab-btn active" data-tab="tramites" role="tab">📋 Mis Trámites</button>
+                <button class="tab-btn" data-tab="nuevo" role="tab">➕ Nuevo Trámite</button>
+                <button class="tab-btn" data-tab="pagos" role="tab">💳 Pagos</button>
+                <button class="tab-btn" data-tab="notificaciones" role="tab">🔔 Notificaciones</button>
+                <button class="tab-btn" data-tab="deudas" role="tab">💰 Mis Deudas</button>
+                <button class="tab-btn" data-tab="dashboard" role="tab">📊 Dashboard</button>
+                <button class="tab-btn" data-tab="soporte" role="tab">💬 Soporte</button>
+            </div>
+        </nav>
+
+        <!-- TAB: MIS TRÁMITES (HU-002, HU-004, HU-005) -->
+        <div id="tramites" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #dbeafe; color: #1e40af;">📄</div>
+                    <div class="stat-info">
+                        <h3>8</h3>
+                        <p>Trámites Activos</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fef3c7; color: #92400e;">⏱️</div>
+                    <div class="stat-info">
+                        <h3>3</h3>
+                        <p>Pendientes</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #d1fae5; color: #065f46;">✅</div>
+                    <div class="stat-info">
+                        <h3>15</h3>
+                        <p>Completados</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fee2e2; color: #991b1b;">❌</div>
+                    <div class="stat-info">
+                        <h3>1</h3>
+                        <p>Rechazados</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Seguimiento de Trámites</h2>
+                    <div style="display: flex; gap: 1rem;">
+                        <input type="text" class="form-input" placeholder="🔍 Buscar por expediente..." style="width: 250px;">
+                        <select class="form-select" style="width: 150px;">
+                            <option>Todos</option>
+                            <option>Pendientes</option>
+                            <option>En proceso</option>
+                            <option>Completados</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Expediente</th>
+                                <th>Tipo de Trámite</th>
+                                <th>Fecha Inicio</th>
+                                <th>Estado</th>
+                                <th>Progreso</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>EXP-2025-001234</strong></td>
+                                <td>Licencia de Funcionamiento</td>
+                                <td>15/10/2025</td>
+                                <td><span class="badge badge-processing">En Revisión</span></td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 60%"></div>
+                                    </div>
+                                    <small style="color: var(--gray-600);">60% - Revisión técnica</small>
+                                </td>
+                                <td>
+                                    <button class="btn btn-outline" style="padding: 0.5rem 1rem;" onclick="verDetalle('001234')">Ver Detalle</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>EXP-2025-001189</strong></td>
+                                <td>Permiso de Construcción</td>
+                                <td>10/10/2025</td>
+                                <td><span class="badge badge-pending">Pendiente Pago</span></td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 30%"></div>
+                                    </div>
+                                    <small style="color: var(--gray-600);">30% - Requiere pago</small>
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary" style="padding: 0.5rem 1rem;">Pagar Ahora</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>EXP-2025-001003</strong></td>
+                                <td>Pago de Arbitrios</td>
+                                <td>01/10/2025</td>
+                                <td><span class="badge badge-completed">Completado</span></td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 100%; background: var(--secondary);"></div>
+                                    </div>
+                                    <small style="color: var(--secondary);">100% - Finalizado</small>
+                                </td>
+                                <td>
+                                    <button class="btn btn-outline" style="padding: 0.5rem 1rem;">Descargar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: NUEVO TRÁMITE (HU-001, HU-003) -->
+        <div id="nuevo" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Nuevo Trámite Municipal</h2>
+                    <span class="badge badge-info">Tiempo estimado: 5 minutos</span>
+                </div>
+
+                <form id="formNuevoTramite">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label required">Tipo de Trámite</label>
+                            <select class="form-select" required>
+                                <option value="">Seleccione...</option>
+                                <option>Licencia de Funcionamiento</option>
+                                <option>Permiso de Construcción</option>
+                                <option>Certificado de Parámetros</option>
+                                <option>Numeración Municipal</option>
+                                <option>Licencia de Anuncio</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">DNI/RUC</label>
+                            <input type="text" class="form-input" placeholder="Ej: 12345678" required maxlength="11">
+                            <small style="color: var(--gray-600);">Se validará con RENIEC/SUNAT</small>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label required">Nombre Completo / Razón Social</label>
+                            <input type="text" class="form-input" required readonly value="Cargando desde RENIEC...">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Teléfono de Contacto</label>
+                            <input type="tel" class="form-input" placeholder="+51 999 999 999" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required">Email</label>
+                        <input type="email" class="form-input" placeholder="correo@ejemplo.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required">Descripción del Trámite</label>
+                        <textarea class="form-textarea" placeholder="Describa brevemente su solicitud..." required></textarea>
+                    </div>
+
+                    <!-- HU-003: Carga de documentación digital -->
+                    <div class="form-group">
+                        <label class="form-label required">Documentos Requeridos</label>
+                        <div class="file-upload-area" id="dropZone">
+                            <svg width="48" height="48" style="margin: 0 auto; color: var(--gray-400);">
+                                <path fill="currentColor" d="M24 4L12 16h7v12h10V16h7L24 4zm0 26c-6.6 0-12 5.4-12 12h24c0-6.6-5.4-12-12-12z"/>
+                            </svg>
+                            <p style="margin: 1rem 0; color: var(--gray-600);"><strong>Arrastra archivos aquí</strong> o haz clic para seleccionar</p>
+                            <small style="color: var(--gray-500);">Formatos: PDF, JPG, PNG (Máx. 10MB por archivo)</small>
+                            <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+                        </div>
+                        <div class="file-list" id="fileList"></div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                        <button type="button" class="btn btn-outline">Guardar Borrador</button>
+                        <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB: PAGOS (HU-006, HU-007, HU-010) -->
+        <div id="pagos" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Realizar Pago Seguro</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='25'%3E%3Ctext x='2' y='18' font-size='14' fill='%231e40af'%3EVISA%3C/text%3E%3C/svg%3E" alt="Visa">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='25'%3E%3Ccircle cx='12' cy='12' r='8' fill='%23eb001b'/%3E%3Ccircle cx='20' cy='12' r='8' fill='%23f79e1b'/%3E%3C/svg%3E" alt="Mastercard">
+                        <span style="font-size: 1.5rem;">📱</span>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label required">Número de Expediente</label>
+                        <input type="text" class="form-input" placeholder="EXP-2025-XXXXXX" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Monto a Pagar</label>
+                        <input type="text" class="form-input" value="S/ 245.00" readonly style="font-size: 1.25rem; font-weight: bold; color: var(--secondary);">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required">Método de Pago</label>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div class="payment-method active" data-method="card">
+                            <input type="radio" name="payment" value="card" checked>
+                            <div>
+                                <strong>💳 Tarjeta</strong>
+                                <p style="font-size: 0.8rem; color: var(--gray-600);">Débito/Crédito</p>
+                            </div>
+                        </div>
+                        <div class="payment-method" data-method="yape">
+                            <input type="radio" name="payment" value="yape">
+                            <div>
+                                <strong>📱 Yape</strong>
+                                <p style="font-size: 0.8rem; color: var(--gray-600);">Pago móvil</p>
+                            </div>
+                        </div>
+                        <div class="payment-method" data-method="plin">
+                            <input type="radio" name="payment" value="plin">
+                            <div>
+                                <strong>💸 Plin</strong>
+                                <p style="font-size: 0.8rem; color: var(--gray-600);">Transferencia</p>
+                            </div>
+                        </div>
+                        <div class="payment-method" data-method="bank">
+                            <input type="radio" name="payment" value="bank">
+                            <div>
+                                <strong>🏦 Banco</strong>
+                                <p style="font-size: 0.8rem; color: var(--gray-600);">Transferencia</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="cardPaymentForm">
+                    <div class="form-grid">
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label required">Número de Tarjeta</label>
+                            <input type="text" class="form-input" placeholder="1234 5678 9012 3456" maxlength="19">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Nombre en Tarjeta</label>
+                            <input type="text" class="form-input" placeholder="JUAN DELGADO">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Fecha Vencimiento</label>
+                            <input type="text" class="form-input" placeholder="MM/AA" maxlength="5">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">CVV</label>
+                            <input type="text" class="form-input" placeholder="123" maxlength="4">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px; margin: 1.5rem 0;">
+                    <p style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+                        <span style="font-size: 1.2rem;">🔒</span>
+                        <strong>Pago 100% seguro con cifrado AES-256</strong>
+                    </p>
+                    <small style="color: var(--gray-600);">Tus datos están protegidos y nunca serán compartidos</small>
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                    Procesar Pago de S/ 245.00
+                </button>
+            </div>
+
+            <!-- HU-007: Comprobantes digitales -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Historial de Pagos</h2>
+                </div>
+
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Expediente</th>
+                                <th>Concepto</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                                <th>Comprobante</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>20/10/2025 14:30</td>
+                                <td>EXP-2025-001234</td>
+                                <td>Derecho de trámite</td>
+                                <td><strong>S/ 245.00</strong></td>
+                                <td><span class="badge badge-completed">✓ Pagado</span></td>
+                                <td>
+                                    <button class="btn btn-outline" style="padding: 0.4rem 0.8rem;">📄 Descargar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>18/10/2025 09:15</td>
+                                <td>EXP-2025-001189</td>
+                                <td>Licencia funcionamiento</td>
+                                <td><strong>S/ 380.00</strong></td>
+                                <td><span class="badge badge-pending">⏱️ Procesando</span></td>
+                                <td>
+                                    <button class="btn btn-outline" style="padding: 0.4rem 0.8rem;" disabled>Procesando...</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: NOTIFICACIONES (HU-011, HU-012) -->
+        <div id="notificaciones" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Centro de Notificaciones</h2>
+                    <button class="btn btn-outline">⚙️ Configurar</button>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1rem;">Preferencias de Notificación</h3>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--gray-50); border-radius: 8px; cursor: pointer;">
+                            <input type="checkbox" checked> 📧 Email
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--gray-50); border-radius: 8px; cursor: pointer;">
+                            <input type="checkbox" checked> 📱 SMS
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--gray-50); border-radius: 8px; cursor: pointer;">
+                            <input type="checkbox" checked> 💬 WhatsApp
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--gray-50); border-radius: 8px; cursor: pointer;">
+                            <input type="checkbox"> 🔔 Push
+                        </label>
+                    </div>
+                </div>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                <strong>✅ Trámite Aprobado</strong>
+                                <small style="color: var(--gray-600);">Hace 2 horas</small>
+                            </div>
+                            <p style="color: var(--gray-700);">Su solicitud EXP-2025-001234 ha sido aprobada. Puede descargar su licencia desde el portal.</p>
+                            <button class="btn btn-primary" style="margin-top: 0.5rem; padding: 0.5rem 1rem;">Ver Trámite</button>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                <strong>⚠️ Documento Pendiente</strong>
+                                <small style="color: var(--gray-600);">Hace 5 horas</small>
+                            </div>
+                            <p style="color: var(--gray-700);">Falta adjuntar el certificado de parámetros para EXP-2025-001189. Vence en 3 días.</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                <strong>💰 Recordatorio de Pago</strong>
+                                <small style="color: var(--gray-600);">Hace 1 día</small>
+                            </div>
+                            <p style="color: var(--gray-700);">Tiene una deuda pendiente de S/ 150.00 en arbitrios. Vence el 25/10/2025.</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                <strong>📋 Trámite Iniciado</strong>
+                                <small style="color: var(--gray-600);">Hace 3 días</small>
+                            </div>
+                            <p style="color: var(--gray-700);">Se registró su solicitud con expediente EXP-2025-001234.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: MIS DEUDAS (HU-008, HU-009) -->
+        <div id="deudas" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Consulta de Deudas Municipales</h2>
+                    <div style="text-align: right;">
+                        <p style="font-size: 0.9rem; color: var(--gray-600);">Total Adeudado</p>
+                        <h3 style="font-size: 2rem; color: var(--danger);">S/ 1,245.00</h3>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Concepto</th>
+                                <th>Periodo</th>
+                                <th>Monto Base</th>
+                                <th>Intereses</th>
+                                <th>Total</th>
+                                <th>Vencimiento</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Arbitrios Municipales</strong></td>
+                                <td>Ene-Mar 2025</td>
+                                <td>S/ 420.00</td>
+                                <td style="color: var(--warning);">S/ 45.00</td>
+                                <td><strong>S/ 465.00</strong></td>
+                                <td style="color: var(--danger);">15/11/2025</td>
+                                <td>
+                                    <button class="btn btn-primary" style="padding: 0.5rem 1rem;">Pagar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Multa de Tránsito</strong></td>
+                                <td>Ago 2025</td>
+                                <td>S/ 250.00</td>
+                                <td style="color: var(--warning);">S/ 30.00</td>
+                                <td><strong>S/ 280.00</strong></td>
+                                <td style="color: var(--danger);">Vencido</td>
+                                <td>
+                                    <button class="btn btn-danger" style="padding: 0.5rem 1rem;">Regularizar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Limpieza Pública</strong></td>
+                                <td>Oct 2025</td>
+                                <td>S/ 500.00</td>
+                                <td style="color: var(--secondary);">S/ 0.00</td>
+                                <td><strong>S/ 500.00</strong></td>
+                                <td>30/10/2025</td>
+                                <td>
+                                    <button class="btn btn-primary" style="padding: 0.5rem 1rem;">Pagar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="btn btn-outline">💾 Exportar Deudas</button>
+                    <button class="btn btn-secondary">💳 Pago Fraccionado</button>
+                    <button class="btn btn-primary">💰 Pagar Todo (S/ 1,245.00)</button>
+                </div>
+            </div>
+
+            <!-- HU-009: Plan de pagos fraccionado -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Simulador de Pago Fraccionado</h2>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Monto a Fraccionar</label>
+                        <input type="number" class="form-input" value="1245" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Número de Cuotas</label>
+                        <select class="form-select" id="cuotasSelect">
+                            <option value="3">3 meses</option>
+                            <option value="6">6 meses</option>
+                            <option value="12">12 meses</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="background: var(--gray-50); padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
+                    <h3 style="margin-bottom: 1rem;">Detalle del Plan</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
+                        <div>
+                            <p style="color: var(--gray-600); font-size: 0.9rem;">Cuota Mensual</p>
+                            <h3 style="color: var(--primary);">S/ 415.00</h3>
+                        </div>
+                        <div>
+                            <p style="color: var(--gray-600); font-size: 0.9rem;">Total a Pagar</p>
+                            <h3 style="color: var(--gray-800);">S/ 1,245.00</h3>
+                        </div>
+                        <div>
+                            <p style="color: var(--gray-600); font-size: 0.9rem;">Interés Adicional</p>
+                            <h3 style="color: var(--secondary);">0%</h3>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Solicitar Plan de Pagos</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: DASHBOARD (HU-020, HU-021, HU-022) -->
+        <div id="dashboard" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #dbeafe; color: #1e40af;">📊</div>
+                    <div class="stat-info">
+                        <h3>2,847</h3>
+                        <p>Trámites Totales</p>
+                        <small style="color: var(--secondary);">↑ 12% vs mes anterior</small>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fef3c7; color: #92400e;">⏱️</div>
+                    <div class="stat-info">
+                        <h3>4.5h</h3>
+                        <p>Tiempo Promedio</p>
+                        <small style="color: var(--danger);">↓ 30% vs mes anterior</small>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #d1fae5; color: #065f46;">😊</div>
+                    <div class="stat-info">
+                        <h3>94%</h3>
+                        <p>Satisfacción</p>
+                        <small style="color: var(--secondary);">↑ 5% vs mes anterior</small>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e0e7ff; color: #4338ca;">💰</div>
+                    <div class="stat-info">
+                        <h3>S/ 450K</h3>
+                        <p>Recaudación</p>
+                        <small style="color: var(--secondary);">↑ 18% vs mes anterior</small>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+                <!-- HU-017: Predicción de cuellos de botella -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title" style="font-size: 1.2rem;">🤖 Alertas Inteligentes</h3>
+                    </div>
+                    <div style="padding: 1rem; background: #fef3c7; border-left: 4px solid var(--warning); border-radius: 8px; margin-bottom: 1rem;">
+                        <strong style="color: var(--warning);">⚠️ Alerta de Saturación</strong>
+                        <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--gray-700);">Se predice un 85% de saturación en Licencias de Funcionamiento en 15 minutos. Recomendación: Reasignar 2 operadores.</p>
+                    </div>
+                    <div style="padding: 1rem; background: var(--gray-50); border-radius: 8px;">
+                        <strong>📈 Tendencia del Día</strong>
+                        <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--gray-700);">Pico de demanda esperado: 2:00 PM - 4:00 PM (45 trámites/hora)</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title" style="font-size: 1.2rem;">📈 Trámites por Tipo</h3>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Licencias Funcionamiento</span>
+                                <strong>847</strong>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%; background: #3b82f6;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Permisos Construcción</span>
+                                <strong>523</strong>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 40%; background: #10b981;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Certificados</span>
+                                <strong>324</strong>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 25%; background: #f59e0b;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HU-021: Reportes personalizables -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Generador de Reportes</h2>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Periodo</label>
+                        <select class="form-select">
+                            <option>Últimos 7 días</option>
+                            <option>Último mes</option>
+                            <option>Último trimestre</option>
+                            <option>Año actual</option>
+                            <option>Personalizado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tipo de Trámite</label>
+                        <select class="form-select">
+                            <option>Todos</option>
+                            <option>Licencias</option>
+                            <option>Permisos</option>
+                            <option>Certificados</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Formato</label>
+                        <select class="form-select">
+                            <option>📄 PDF</option>
+                            <option>📊 Excel</option>
+                            <option>📋 CSV</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Frecuencia</label>
+                        <select class="form-select">
+                            <option>Una vez</option>
+                            <option>Diario</option>
+                            <option>Semanal</option>
+                            <option>Mensual</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary">📥 Generar Reporte</button>
+            </div>
+        </div>
+
+        <!-- TAB: SOPORTE (HU-013, HU-018) -->
+        <div id="soporte" class="tab-content">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                <!-- HU-018: Chatbot IA -->
+                <div class="card" style="grid-column: 1 / -1; max-width: 800px; margin: 0 auto; width: 100%;">
+                    <div class="card-header">
+                        <h2 class="card-title">🤖 Asistente Virtual 24/7</h2>
+                        <span class="badge badge-completed">En línea</span>
+                    </div>
+
+                    <div style="background: var(--gray-50); border-radius: 8px; padding: 1rem; height: 400px; overflow-y: auto; margin-bottom: 1rem;" id="chatMessages">
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <div style="width: 40px; height: 40px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0;">🤖</div>
+                            <div style="background: white; padding: 1rem; border-radius: 12px; max-width: 70%;">
+                                <p>¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?</p>
+                                <small style="color: var(--gray-600);">10:30 AM</small>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem; justify-content: flex-end;">
+                            <div style="background: var(--primary); color: white; padding: 1rem; border-radius: 12px; max-width: 70%;">
+                                <p>¿Qué documentos necesito para una licencia de funcionamiento?</p>
+                                <small style="opacity: 0.8;">10:31 AM</small>
+                            </div>
+                            <div style="width: 40px; height: 40px; background: var(--secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0;">JD</div>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <div style="width: 40px; height: 40px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0;">🤖</div>
+                            <div style="background: white; padding: 1rem; border-radius: 12px; max-width: 70%;">
+                                <p><strong>Para obtener tu licencia de funcionamiento necesitas:</strong></p>
+                                <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                                    <li>Copia de DNI o RUC</li>
+                                    <li>Certificado de inspección técnica</li>
+                                    <li>Declaración jurada</li>
+                                    <li>Croquis de ubicación</li>
+                                </ul>
+                                <p>¿Quieres iniciar el trámite ahora?</p>
+                                <small style="color: var(--gray-600);">10:31 AM</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <input type="text" class="form-input" placeholder="Escribe tu mensaje..." style="flex: 1;">
+                        <button class="btn btn-primary">Enviar</button>
+                    </div>
+
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <button class="btn btn-outline">👤 Hablar con un agente humano</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preguntas frecuentes -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">❓ Preguntas Frecuentes</h2>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <details style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                        <summary style="cursor: pointer; font-weight: 600;">¿Cuánto tiempo demora una licencia de funcionamiento?</summary>
+                        <p style="margin-top: 1rem; color: var(--gray-700);">El tiempo promedio es de 15 días hábiles, pero con documentación completa puede reducirse a 7 días.</p>
+                    </details>
+
+                    <details style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                        <summary style="cursor: pointer; font-weight: 600;">¿Puedo pagar en cuotas?</summary>
+                        <p style="margin-top: 1rem; color: var(--gray-700);">Sí, ofrecemos planes de pago fraccionado de hasta 12 meses para deudas mayores a S/ 500.</p>
+                    </details>
+
+                    <details style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                        <summary style="cursor: pointer; font-weight: 600;">¿Cómo modifico un trámite enviado?</summary>
+                        <p style="margin-top: 1rem; color: var(--gray-700);">Puedes modificar trámites en estado "Pendiente de revisión" desde la sección "Mis Trámites".</p>
+                    </details>
+
+                    <details style="background: var(--gray-50); padding: 1rem; border-radius: 8px;">
+                        <summary style="cursor: pointer; font-weight: 600;">¿Mis pagos son seguros?</summary>
+                        <p style="margin-top: 1rem; color: var(--gray-700);">Sí, usamos cifrado AES-256 y cumplimos con estándares PCI DSS. Tus datos están 100% protegidos.</p>
+                    </details>
+                </div>
+            </div>
+
+            <!-- Información de contacto -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📞 Otros Canales de Atención</h2>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <div style="text-align: center; padding: 1rem;">
+                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">📞</div>
+                        <strong>Central Telefónica</strong>
+                        <p style="color: var(--primary); font-size: 1.2rem; margin: 0.5rem 0;">064-481-111</p>
+                        <small style="color: var(--gray-600);">Lun-Vie 8am-6pm</small>
+                    </div>
+
+                    <div style="text-align: center; padding: 1rem;">
+                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">📧</div>
+                        <strong>Email</strong>
+                        <p style="color: var(--primary); margin: 0.5rem 0;">tramites@munihuancayo.gob.pe</p>
+                        <small style="color: var(--gray-600);">Respuesta en 24h</small>
+                    </div>
+
+                    <div style="text-align: center; padding: 1rem;">
+                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">📍</div>
+                        <strong>Oficina Presencial</strong>
+                        <p style="color: var(--primary); margin: 0.5rem 0;">Jr. Real 108, Huancayo</p>
+                        <small style="color: var(--gray-600);">Lun-Vie 8am-4pm</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Detalle de Trámite -->
+    <div id="modalDetalle" class="modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
+                <h2>Detalle del Trámite</h2>
+                <button onclick="cerrarModal('modalDetalle')" style="border: none; background: none; font-size: 1.5rem; cursor: pointer;">✕</button>
+            </div>
+
+            <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                    <div>
+                        <small style="color: var(--gray-600);">Expediente</small>
+                        <p style="font-weight: 600;">EXP-2025-001234</p>
+                    </div>
+                    <div>
+                        <small style="color: var(--gray-600);">Estado</small>
+                        <p><span class="badge badge-processing">En Revisión</span></p>
+                    </div>
+                    <div>
+                        <small style="color: var(--gray-600);">Tipo</small>
+                        <p>Licencia de Funcionamiento</p>
+                    </div>
+                    <div>
+                        <small style="color: var(--gray-600);">Fecha de Inicio</small>
+                        <p>15/10/2025</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom: 1rem;">Historial de Estados</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div>
+                        <strong>✅ En Revisión Técnica</strong>
+                        <p style="color: var(--gray-600); font-size: 0.9rem; margin-top: 0.25rem;">20/10/2025 14:30</p>
+                        <p style="margin-top: 0.5rem;">Asignado a: Ing. María Torres</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div>
+                        <strong>💰 Pago Confirmado</strong>
+                        <p style="color: var(--gray-600); font-size: 0.9rem; margin-top: 0.25rem;">18/10/2025 09:15</p>
+                        <p style="margin-top: 0.5rem;">Monto: S/ 245.00</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div>
+                        <strong>📄 Documentos Recibidos</strong>
+                        <p style="color: var(--gray-600); font-size: 0.9rem; margin-top: 0.25rem;">17/10/2025 16:45</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div>
+                        <strong>📋 Solicitud Registrada</strong>
+                        <p style="color: var(--gray-600); font-size: 0.9rem; margin-top: 0.25rem;">15/10/2025 10:20</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button class="btn btn-outline" onclick="cerrarModal('modalDetalle')">Cerrar</button>
+                <button class="btn btn-primary">📥 Descargar Expediente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- HU-026: Controles de accesibilidad -->
+    <div style="position: fixed; bottom: 2rem; right: 2rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 1000;">
+        <button class="btn btn-outline" onclick="toggleHighContrast()" title="Activar alto contraste" style="width: 50px; height: 50px; border-radius: 50%; padding: 0;">
+            🎨
+        </button>
+        <button class="btn btn-outline" onclick="increaseFontSize()" title="Aumentar tamaño de texto" style="width: 50px; height: 50px; border-radius: 50%; padding: 0;">
+            A+
+        </button>
+        <button class="btn btn-outline" onclick="decreaseFontSize()" title="Disminuir tamaño de texto" style="width: 50px; height: 50px; border-radius: 50%; padding: 0;">
+            A-
+        </button>
+    </div>
+
+    <script>
+        // ============================================
+        // NAVEGACIÓN DE TABS
+        // ============================================
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                
+                // Actualizar botones
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Actualizar contenido
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // ============================================
+        // HU-003: CARGA DE ARCHIVOS CON DRAG & DROP
+        // ============================================
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        let uploadedFiles = [];
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                // HU-003: Validar tamaño (10MB) y formato
+                if (file.size > 10 * 1024 * 1024) {
+                    showToast('Error: El archivo ' + file.name + ' supera el límite de 10MB', 'error');
+                    return;
+                }
+
+                const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+                if (!allowedTypes.includes(file.type)) {
+                    showToast('Error: Formato no permitido. Solo PDF, JPG, PNG', 'error');
+                    return;
+                }
+
+                uploadedFiles.push(file);
+                displayFile(file);
+            });
+        }
+
+        function displayFile(file) {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.5rem;">${getFileIcon(file.type)}</span>
+                    <div>
+                        <strong>${file.name}</strong>
+                        <p style="font-size: 0.8rem; color: var(--gray-600);">${formatFileSize(file.size)}</p>
+                    </div>
+                </div>
+                <button class="btn btn-danger" style="padding: 0.5rem;" onclick="removeFile('${file.name}')">🗑️</button>
+            `;
+            fileList.appendChild(fileItem);
+        }
+
+        function getFileIcon(type) {
+            if (type === 'application/pdf') return '📄';
+            if (type.startsWith('image/')) return '🖼️';
+            return '📎';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function removeFile(fileName) {
+            uploadedFiles = uploadedFiles.filter(f => f.name !== fileName);
+            renderFileList();
+        }
+
+        function renderFileList() {
+            fileList.innerHTML = '';
+            uploadedFiles.forEach(file => displayFile(file));
+        }
+
+        // ============================================
+        // MÉTODOS DE PAGO
+        // ============================================
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('click', () => {
+                document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
+                method.classList.add('active');
+                method.querySelector('input[type="radio"]').checked = true;
+            });
+        });
+
+        // ============================================
+        // SISTEMA DE NOTIFICACIONES (TOAST)
+        // ============================================
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icon = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            }[type];
+            
+            toast.innerHTML = `
+                <span style="font-size: 1.5rem;">${icon}</span>
+                <div style="flex: 1;">
+                    <strong>${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
+                    <p style="margin-top: 0.25rem; font-size: 0.9rem;">${message}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" style="border: none; background: none; cursor: pointer; font-size: 1.2rem;">✕</button>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        // ============================================
+        // MODALES
+        // ============================================
+        function verDetalle(expediente) {
+            document.getElementById('modalDetalle').classList.add('active');
+            // Aquí se cargarían los datos reales del expediente
+            showToast('Cargando detalles del expediente...', 'info');
+        }
+
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // ============================================
+        // HU-024: CAMBIO DE IDIOMA
+        // ============================================
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const lang = btn.dataset.lang;
+                showToast(`Idioma cambiado a ${lang === 'es' ? 'Español' : 'Quechua'}`, 'success');
+                // Aquí se implementaría la lógica de traducción
+            });
+        });
+
+        // ============================================
+        // HU-026: ACCESIBILIDAD
+        // ============================================
+        let fontSize = 100;
+        let highContrast = false;
+
+        function toggleHighContrast() {
+            highContrast = !highContrast;
+            document.body.classList.toggle('high-contrast');
+            showToast(highContrast ? 'Alto contraste activado' : 'Alto contraste desactivado', 'info');
+        }
+
+        function increaseFontSize() {
+            if (fontSize < 200) {
+                fontSize += 10;
+                document.documentElement.style.fontSize = fontSize + '%';
+                showToast('Tamaño de texto aumentado', 'success');
+            }
+        }
+
+        function decreaseFontSize() {
+            if (fontSize > 100) {
+                fontSize -= 10;
+                document.documentElement.style.fontSize = fontSize + '%';
+                showToast('Tamaño de texto reducido', 'success');
+            }
+        }
+
+        // ============================================
+        // VALIDACIÓN DE FORMULARIOS
+        // ============================================
+        document.getElementById('formNuevoTramite')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (uploadedFiles.length === 0) {
+                showToast('Debe adjuntar al menos un documento', 'warning');
+                return;
+            }
+
+            // HU-001: Simulación de validación RENIEC
+            showToast('Validando identidad con RENIEC...', 'info');
+            
+            setTimeout(() => {
+                showToast('✅ Identidad verificada correctamente', 'success');
+                
+                setTimeout(() => {
+                    // HU-001: Generación de número de expediente
+                    const expediente = 'EXP-2025-' + Math.floor(100000 + Math.random() * 900000);
+                    showToast(`Expediente generado: ${expediente}`, 'success');
+                    
+                    // HU-001: Confirmación por email y SMS
+                    setTimeout(() => {
+                        showToast('📧 Confirmación enviada a tu email', 'info');
+                        showToast('📱 SMS enviado a tu teléfono', 'info');
+                    }, 1000);
+                }, 2000);
+            }, 1500);
+        });
+
+        // ============================================
+        // HU-009: SIMULADOR DE CUOTAS
+        // ============================================
+        document.getElementById('cuotasSelect')?.addEventListener('change', (e) => {
+            const cuotas = parseInt(e.target.value);
+            const monto = 1245;
+            const cuotaMensual = (monto / cuotas).toFixed(2);
+            
+            document.querySelector('.stat-info h3').textContent = `S/ ${cuotaMensual}`;
+            showToast(`Plan recalculado para ${cuotas} cuotas`, 'success');
+        });
+
+        // ============================================
+        // INICIALIZACIÓN
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mensaje de bienvenida
+            setTimeout(() => {
+                showToast('¡Bienvenido al Portal Municipal de Huancayo!', 'success');
+            }, 500);
+
+            // HU-002: Simulación de actualización en tiempo real
+            setInterval(() => {
+                // Aquí se actualizarían los estados de los trámites sin recargar
+                console.log('Verificando actualizaciones de trámites...');
+            }, 30000); // Cada 30 segundos
+
+            // HU-012: Simulación de recordatorio
+            setTimeout(() => {
+                showToast('📅 Recordatorio: Vence pago de arbitrios en 3 días', 'warning');
+            }, 5000);
+        });
+
+        // ============================================
+        // ESTILOS ADICIONALES PARA PAYMENT METHODS
+        // ============================================
+        const style = document.createElement('style');
+        style.textContent = `
+            .payment-method {
+                padding: 1rem;
+                border: 2px solid var(--gray-300);
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+            
+            .payment-method:hover {
+                border-color: var(--primary);
+                background: var(--gray-50);
+            }
+            
+            .payment-method.active {
+                border-color: var(--primary);
+                background: rgba(30, 64, 175, 0.05);
+            }
+            
+            .payment-method input[type="radio"] {
+                width: 20px;
+                height: 20px;
+                cursor: pointer;
+            }
+            
+            @keyframes slideOut {
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // ============================================
+        // HU-014: VALIDACIÓN AUTOMÁTICA RENIEC (Simulada)
+        // ============================================
+        function validarRENIEC(dni) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve({
+                        success: true,
+                        data: {
+                            nombre: 'JUAN CARLOS DELGADO MARTINEZ',
+                            dni: dni,
+                            direccion: 'JR. REAL 456, HUANCAYO'
+                        }
+                    });
+                }, 2000);
+            });
+        }
+
+        // ============================================
+        // MANEJO DE ERRORES GLOBAL
+        // ============================================
+        window.addEventListener('error', (e) => {
+            console.error('Error capturado:', e);
+            showToast('Ha ocurrido un error. Por favor, intente nuevamente.', 'error');
+        });
+
+        // ============================================
+        // PREVENCIÓN DE PÉRDIDA DE DATOS
+        // ============================================
+        let formModified = false;
+
+        document.querySelectorAll('input, textarea, select').forEach(element => {
+            element.addEventListener('change', () => {
+                formModified = true;
+            });
+        });
+
+        window.addEventListener('beforeunload', (e) => {
+            if (formModified) {
+                e.preventDefault();
+                e.returnValue = '¿Estás seguro de salir? Tienes cambios sin guardar.';
+            }
+        })
+        // ============================================
+// INTEGRACIÓN CON EL BACKEND
+// ============================================
+
+const API_BASE_URL = window.location.origin + '/api';
+
+// Servicios de API
+class ApiService {
+    static async request(endpoint, options = {}) {
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                },
+                ...options
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error en API request:', error);
+            throw error;
+        }
+    }
+
+    // HU-014: Registrar ciudadano
+    static async registrarCiudadano(datos) {
+        return this.request('/ciudadanos/registrar', {
+            method: 'POST',
+            body: JSON.stringify(datos)
+        });
+    }
+
+    // HU-001: Registrar trámite
+    static async registrarTramite(datos) {
+        return this.request('/tramites/registrar', {
+            method: 'POST',
+            body: JSON.stringify(datos)
+        });
+    }
+
+    // HU-002: Consultar estado de trámite
+    static async consultarEstadoTramite(numeroExpediente) {
+        return this.request(`/tramites/${numeroExpediente}/estado`);
+    }
+
+    // HU-006: Procesar pago
+    static async procesarPago(datos) {
+        return this.request('/pagos/procesar', {
+            method: 'POST',
+            body: JSON.stringify(datos)
+        });
+    }
+
+    // HU-008: Consultar deudas
+    static async consultarDeudas(ciudadanoId) {
+        return this.request(`/ciudadanos/${ciudadanoId}/deudas`);
+    }
+
+    // HU-009: Crear plan de pagos
+    static async crearPlanPagos(deudaId, numeroCuotas) {
+        return this.request(`/deudas/${deudaId}/plan-pagos`, {
+            method: 'POST',
+            body: JSON.stringify({ numeroCuotas })
+        });
+    }
+}
+
+// ============================================
+// INTEGRACIÓN CON LOS FORMULARIOS EXISTENTES
+// ============================================
+
+// HU-001: Formulario de nuevo trámite
+document.getElementById('formNuevoTramite')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const datosTramite = {
+        dni: formData.get('dni'),
+        tipo: formData.get('tipo'),
+        descripcion: formData.get('descripcion'),
+        email: formData.get('email'),
+        telefono: formData.get('telefono')
+    };
+
+    try {
+        showToast('Enviando solicitud de trámite...', 'info');
+        
+        const resultado = await ApiService.registrarTramite(datosTramite);
+        
+        if (resultado.success) {
+            showToast(`✅ Trámite registrado. Expediente: ${resultado.data.numeroExpediente}`, 'success');
+            
+            // Limpiar formulario
+            e.target.reset();
+            uploadedFiles = [];
+            renderFileList();
+            
+            // Actualizar lista de trámites
+            setTimeout(() => {
+                document.querySelector('[data-tab="tramites"]').click();
+            }, 2000);
+        } else {
+            showToast(`❌ Error: ${resultado.error}`, 'error');
+        }
+    } catch (error) {
+        showToast(`❌ Error al registrar trámite: ${error.message}`, 'error');
+    }
+});
+
+// HU-006: Procesar pago
+document.querySelector('#pagos .btn-primary')?.addEventListener('click', async () => {
+    const expediente = document.querySelector('#pagos input[placeholder*="EXP"]').value;
+    const monto = 245.00; // En una app real, esto vendría del backend
+    
+    const datosPago = {
+        monto: monto,
+        metodo: document.querySelector('#pagos input[name="payment"]:checked').value,
+        tramiteId: expediente,
+        datosPago: {
+            // Datos de la tarjeta (en producción esto iría cifrado)
+            numeroTarjeta: document.querySelector('#pagos input[placeholder*="1234"]')?.value,
+            nombreTarjeta: document.querySelector('#pagos input[placeholder*="JUAN"]')?.value,
+            fechaVencimiento: document.querySelector('#pagos input[placeholder*="MM/AA"]')?.value,
+            cvv: document.querySelector('#pagos input[placeholder*="123"]')?.value
+        }
+    };
+
+    try {
+        showToast('Procesando pago...', 'info');
+        
+        const resultado = await ApiService.procesarPago(datosPago);
+        
+        if (resultado.success) {
+            showToast(`✅ Pago procesado. Comprobante: ${resultado.data.comprobante}`, 'success');
+            
+            // Actualizar interfaz
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        } else {
+            showToast(`❌ Error en pago: ${resultado.error}`, 'error');
+        }
+    } catch (error) {
+        showToast(`❌ Error al procesar pago: ${error.message}`, 'error');
+    }
+});
+
+// HU-009: Simulador de plan de pagos
+document.getElementById('cuotasSelect')?.addEventListener('change', async (e) => {
+    const cuotas = parseInt(e.target.value);
+    const montoTotal = 1245.00;
+    const montoCuota = (montoTotal / cuotas).toFixed(2);
+    
+    // Actualizar interfaz
+    document.querySelector('#deudas .stat-info h3').textContent = `S/ ${montoCuota}`;
+    
+    showToast(`Plan recalculado: ${cuotas} cuotas de S/ ${montoCuota}`, 'success');
+});
+
+// HU-008: Cargar deudas al abrir la pestaña
+document.querySelector('[data-tab="deudas"]')?.addEventListener('click', async () => {
+    try {
+        // Simular ID de ciudadano (en producción vendría del login)
+        const ciudadanoId = 1;
+        const deudas = await ApiService.consultarDeudas(ciudadanoId);
+        
+        if (deudas.success) {
+            console.log('Deudas cargadas:', deudas.data);
+            // Aquí actualizarías la tabla de deudas con los datos reales
+        }
+    } catch (error) {
+        console.error('Error cargando deudas:', error);
+    }
+});
+
+// HU-002: Actualización automática de estados
+setInterval(async () => {
+    try {
+        // Actualizar estados de trámites en tiempo real
+        const elementosExpediente = document.querySelectorAll('#tramites strong');
+        for (const elemento of elementosExpediente) {
+            const expediente = elemento.textContent.trim();
+            if (expediente.startsWith('EXP-')) {
+                const estado = await ApiService.consultarEstadoTramite(expediente);
+                if (estado.success) {
+                    // Actualizar interfaz con el estado real
+                    console.log(`Estado actualizado: ${expediente} - ${estado.data.estado}`);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error actualizando estados:', error);
+    }
+}, 30000); // Cada 30 segundos
+
+// HU-014: Validación RENIEC en tiempo real
+document.querySelector('#nuevo input[placeholder*="DNI"]')?.addEventListener('blur', async (e) => {
+    const dni = e.target.value.trim();
+    
+    if (dni.length === 8 && /^\d+$/.test(dni)) {
+        try {
+            showToast('Validando DNI con RENIEC...', 'info');
+            
+            // Simular validación RENIEC
+            setTimeout(() => {
+                document.querySelector('#nuevo input[placeholder*="Nombre"]').value = `CIUDADANO ${dni}`;
+                showToast('✅ DNI validado correctamente', 'success');
+            }, 2000);
+        } catch (error) {
+            showToast('❌ Error validando DNI', 'error');
+        }
+    }
+});
+    </script>
+</body>
+</html>

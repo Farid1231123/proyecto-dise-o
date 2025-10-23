@@ -1,0 +1,562 @@
+
+// ============================================
+// CONTROLADOR PRINCIPAL
+// ============================================
+
+class ControladorMunicipal {
+    constructor() {
+        this.modelo = new ModeloMunicipal();
+        this.ciudadanoActual = null;
+        this.init();
+    }
+
+    async init() {
+        await this.cargarDatosIniciales();
+        this.configurarEventos();
+        this.iniciarActualizacionesAutomaticas();
+    }
+
+    async cargarDatosIniciales() {
+        try {
+            // Simular usuario logueado
+            this.ciudadanoActual = await this.modelo.obtenerCiudadano(1); // ID hardcodeado para demo
+            this.actualizarUIUsuario();
+            
+            // Cargar datos iniciales
+            await this.cargarTramites();
+            await this.cargarDeudas();
+            await this.cargarExpedientesParaPago();
+            
+            this.mostrarToast('Sistema cargado correctamente', 'success');
+        } catch (error) {
+            this.mostrarToast('Error cargando datos iniciales: ' + error.message, 'error');
+        }
+    }
+
+    configurarEventos() {
+        // Navegación de tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.cambiarTab(e));
+        });
+
+        // Formulario de nuevo trámite
+        document.getElementById('formNuevoTramite').addEventListener('submit', (e) => this.registrarTramite(e));
+
+        // Búsqueda y filtros
+        document.getElementById('buscarExpediente').addEventListener('input', (e) => this.filtrarTramites());
+        document.getElementById('filtroEstado').addEventListener('change', (e) => this.filtrarTramites());
+
+        // Validación DNI en tiempo real
+        document.getElementById('dniTramite').addEventListener('blur', (e) => this.validarDNI(e.target.value));
+    }
+
+    // ============================================
+    // MÉTODOS DE TRÁMITES (HU-001, HU-002, HU-004, HU-005)
+    // ============================================
+
+    async registrarTramite(event) {
+        event.preventDefault();
+        
+        const datosTramite = {
+            dni: document.getElementById('dniTramite').value,
+            tipo: document.getElementById('tipoTramite').value,
+            descripcion: document.getElementById('descripcionTramite').value,
+            ciudadanoId: this.ciudadanoActual?.id || 1
+        };
+
+        try {
+            this.mostrarToast('Enviando solicitud de trámite...', 'info');
+            
+            const resultado = await this.modelo.registrarTramite(datosTramite);
+            
+            if (resultado.success) {
+                this.mostrarToast(`✅ Trámite registrado. Expediente: ${resultado.data.numeroExpediente}`, 'success');
+                this.limpiarFormulario();
+                await this.cargarTramites();
+                
+                // Cambiar a pestaña de trámites
+                setTimeout(() => {
+                    document.querySelector('[data-tab="tramites"]').click();
+                }, 2000);
+            } else {
+                this.mostrarToast(`❌ Error: ${resultado.error}`, 'error');
+            }
+        } catch (error) {
+            this.mostrarToast(`❌ Error al registrar trámite: ${error.message}`, 'error');
+        }
+    }
+
+    async cargarTramites() {
+        try {
+            const tramites = await this.modelo.obtenerTramitesCiudadano(this.ciudadanoActual?.id || 1);
+            this.mostrarTramitesEnTabla(tramites);
+            this.actualizarEstadisticasTramites(tramites);
+        } catch (error) {
+            console.error('Error cargando trámites:', error);
+        }
+    }
+
+    mostrarTramitesEnTabla(tramites) {
+        const tbody = document.getElementById('tablaTramites');
+        tbody.innerHTML = '';
+
+        tramites.forEach(tramite => {
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td><strong>${tramite.numero_expediente}</strong></td>
+                <td>${this.formatearTipoTramite(tramite.tipo)}</td>
+                <td>${new Date(tramite.fecha_inicio).toLocaleDateString()}</td>
+                <td><span class="badge ${this.obtenerClaseEstado(tramite.estado)}">${tramite.estado}</span></td>
+                <td>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${this.calcularProgreso(tramite.estado)}%"></div>
+                    </div>
+                    <small style="color: var(--gray-600);">${this.calcularProgreso(tramite.estado)}% - ${this.obtenerEtapa(tramite.estado)}</small>
+                </td>
+                <td>
+                    <button class="btn btn-outline" style="padding: 0.5rem 1rem;" onclick="controlador.verDetalleTramite('${tramite.numero_expediente}')">Ver Detalle</button>
+                    ${tramite.estado === 'PENDIENTE' ? `<button class="btn btn-danger" style="padding: 0.5rem 1rem; margin-left: 0.5rem;" onclick="controlador.cancelarTramite(${tramite.id})">Cancelar</button>` : ''}
+                </td>
+            `;
+            tbody.appendChild(fila);
+        });
+    }
+
+    async verDetalleTramite(expediente) {
+        try {
+            const detalle = await this.modelo.obtenerDetalleTramite(expediente);
+            this.mostrarModalDetalle(detalle);
+        } catch (error) {
+            this.mostrarToast('Error cargando detalle del trámite', 'error');
+        }
+    }
+
+    async cancelarTramite(tramiteId) {
+        if (confirm('¿Está seguro de que desea cancelar este trámite?')) {
+            try {
+                const resultado = await this.modelo.cancelarTramite(tramiteId);
+                if (resultado.success) {
+                    this.mostrarToast('Trámite cancelado exitosamente', 'success');
+                    await this.cargarTramites();
+                } else {
+                    this.mostrarToast(`Error: ${resultado.error}`, 'error');
+                }
+            } catch (error) {
+                this.mostrarToast('Error cancelando trámite', 'error');
+            }
+        }
+    }
+
+    // ============================================
+    // MÉTODOS DE PAGOS (HU-006, HU-007, HU-010)
+    // ============================================
+
+    async cargarExpedientesParaPago() {
+        try {
+            const expedientes = await this.modelo.obtenerExpedientesPendientesPago(this.ciudadanoActual?.id || 1);
+            const select = document.getElementById('expedientePago');
+            select.innerHTML = '<option value="">Seleccione expediente...</option>';
+            
+            expedientes.forEach(exp => {
+                const option = document.createElement('option');
+                option.value = exp.id;
+                option.textContent = `${exp.numero_expediente} - ${this.formatearTipoTramite(exp.tipo)} (S/ ${exp.monto_pendiente || '0.00'})`;
+                option.dataset.monto = exp.monto_pendiente || '0';
+                select.appendChild(option);
+            });
+
+            select.addEventListener('change', (e) => this.actualizarMontoPago(e));
+        } catch (error) {
+            console.error('Error cargando expedientes:', error);
+        }
+    }
+
+    actualizarMontoPago(event) {
+        const selectedOption = event.target.selectedOptions[0];
+        const monto = selectedOption?.dataset.monto || '0';
+        document.getElementById('montoPago').value = `S/ ${parseFloat(monto).toFixed(2)}`;
+    }
+
+    async procesarPago() {
+        const expedienteSelect = document.getElementById('expedientePago');
+        const expedienteId = expedienteSelect.value;
+        const monto = parseFloat(expedienteSelect.selectedOptions[0]?.dataset.monto || '0');
+        const metodo = document.querySelector('input[name="metodoPago"]:checked').value;
+
+        if (!expedienteId || monto <= 0) {
+            this.mostrarToast('Seleccione un expediente válido para pagar', 'warning');
+            return;
+        }
+
+        try {
+            this.mostrarToast('Procesando pago...', 'info');
+            
+            const resultado = await this.modelo.procesarPago({
+                expedienteId: expedienteId,
+                monto: monto,
+                metodo: metodo
+            });
+
+            if (resultado.success) {
+                this.mostrarToast(`✅ Pago procesado. Comprobante: ${resultado.data.comprobante}`, 'success');
+                
+                // Actualizar interfaces
+                await this.cargarExpedientesParaPago();
+                await this.cargarTramites();
+                
+                // Limpiar formulario
+                document.getElementById('montoPago').value = 'S/ 0.00';
+                expedienteSelect.selectedIndex = 0;
+            } else {
+                this.mostrarToast(`❌ Error en pago: ${resultado.error}`, 'error');
+            }
+        } catch (error) {
+            this.mostrarToast(`❌ Error al procesar pago: ${error.message}`, 'error');
+        }
+    }
+
+    // ============================================
+    // MÉTODOS DE DEUDAS (HU-008, HU-009)
+    // ============================================
+
+    async cargarDeudas() {
+        try {
+            const deudas = await this.modelo.obtenerDeudasCiudadano(this.ciudadanoActual?.id || 1);
+            this.mostrarDeudasEnTabla(deudas);
+            this.actualizarTotalDeudas(deudas);
+        } catch (error) {
+            console.error('Error cargando deudas:', error);
+        }
+    }
+
+    mostrarDeudasEnTabla(deudas) {
+        const tbody = document.getElementById('tablaDeudas');
+        tbody.innerHTML = '';
+
+        deudas.forEach(deuda => {
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td><strong>${this.formatearTipoDeuda(deuda.tipo)}</strong></td>
+                <td>${deuda.periodo || 'N/A'}</td>
+                <td>S/ ${parseFloat(deuda.monto_base).toFixed(2)}</td>
+                <td style="color: var(--warning);">S/ ${parseFloat(deuda.intereses_moratorios || 0).toFixed(2)}</td>
+                <td><strong>S/ ${parseFloat(deuda.monto_total).toFixed(2)}</strong></td>
+                <td style="color: ${this.estaVencida(deuda.fecha_vencimiento) ? 'var(--danger)' : 'inherit'}">
+                    ${new Date(deuda.fecha_vencimiento).toLocaleDateString()}
+                    ${this.estaVencida(deuda.fecha_vencimiento) ? ' (Vencido)' : ''}
+                </td>
+                <td>
+                    <button class="btn btn-primary" style="padding: 0.5rem 1rem;" onclick="controlador.pagarDeuda(${deuda.id})">Pagar</button>
+                    ${deuda.monto_total > 500 ? `<button class="btn btn-secondary" style="padding: 0.5rem 1rem; margin-left: 0.5rem;" onclick="controlador.mostrarPlanPagos(${deuda.id}, ${deuda.monto_total})">Plan Pagos</button>` : ''}
+                </td>
+            `;
+            tbody.appendChild(fila);
+        });
+    }
+
+    async pagarDeuda(deudaId) {
+        try {
+            const resultado = await this.modelo.pagarDeuda(deudaId);
+            if (resultado.success) {
+                this.mostrarToast('Deuda pagada exitosamente', 'success');
+                await this.cargarDeudas();
+            } else {
+                this.mostrarToast(`Error: ${resultado.error}`, 'error');
+            }
+        } catch (error) {
+            this.mostrarToast('Error pagando deuda', 'error');
+        }
+    }
+
+    mostrarPlanPagos(deudaId, montoTotal) {
+        document.getElementById('montoFraccionar').value = montoTotal;
+        document.getElementById('detallePlan').style.display = 'block';
+        this.calcularCuotas();
+        
+        // Configurar botón de creación de plan
+        document.getElementById('detallePlan').innerHTML = `
+            <div style="background: var(--gray-50); padding: 1.5rem; border-radius: 8px; margin-top: 1rem;">
+                <h3>Detalle del Plan</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center; margin: 1rem 0;">
+                    <div>
+                        <p style="color: var(--gray-600); font-size: 0.9rem;">Cuota Mensual</p>
+                        <h3 style="color: var(--primary);" id="montoCuotaDisplay">S/ 0.00</h3>
+                    </div>
+                    <div>
+                        <p style="color: var(--gray-600); font-size: 0.9rem;">Total a Pagar</p>
+                        <h3 style="color: var(--gray-800);">S/ ${montoTotal.toFixed(2)}</h3>
+                    </div>
+                    <div>
+                        <p style="color: var(--gray-600); font-size: 0.9rem;">Interés Adicional</p>
+                        <h3 style="color: var(--secondary);">0%</h3>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="controlador.crearPlanPagos(${deudaId})">Solicitar Plan de Pagos</button>
+            </div>
+        `;
+    }
+
+    calcularCuotas() {
+        const montoTotal = parseFloat(document.getElementById('montoFraccionar').value);
+        const cuotas = parseInt(document.getElementById('cuotasSelect').value);
+        const montoCuota = (montoTotal / cuotas).toFixed(2);
+        
+        const montoCuotaDisplay = document.getElementById('montoCuotaDisplay');
+        if (montoCuotaDisplay) {
+            montoCuotaDisplay.textContent = `S/ ${montoCuota}`;
+        }
+    }
+
+    async crearPlanPagos(deudaId) {
+        const cuotas = parseInt(document.getElementById('cuotasSelect').value);
+        
+        try {
+            const resultado = await this.modelo.crearPlanPagos(deudaId, cuotas);
+            if (resultado.success) {
+                this.mostrarToast(`✅ Plan de pagos creado: ${cuotas} cuotas`, 'success');
+                await this.cargarDeudas();
+                document.getElementById('detallePlan').style.display = 'none';
+            } else {
+                this.mostrarToast(`Error: ${resultado.error}`, 'error');
+            }
+        } catch (error) {
+            this.mostrarToast('Error creando plan de pagos', 'error');
+        }
+    }
+
+    // ============================================
+    // MÉTODOS AUXILIARES
+    // ============================================
+
+    actualizarUIUsuario() {
+        if (this.ciudadanoActual) {
+            document.getElementById('userName').textContent = this.ciudadanoActual.nombre;
+            document.getElementById('userDni').textContent = `DNI: ${this.ciudadanoActual.dni}`;
+        }
+    }
+
+    actualizarEstadisticasTramites(tramites) {
+        const stats = {
+            total: tramites.length,
+            pendientes: tramites.filter(t => t.estado === 'PENDIENTE').length,
+            enRevision: tramites.filter(t => t.estado === 'EN_REVISION').length,
+            completados: tramites.filter(t => t.estado === 'COMPLETADO').length
+        };
+
+        document.getElementById('statsTramites').innerHTML = `
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #dbeafe; color: #1e40af;">📄</div>
+                <div class="stat-info">
+                    <h3>${stats.total}</h3>
+                    <p>Trámites Totales</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #fef3c7; color: #92400e;">⏱️</div>
+                <div class="stat-info">
+                    <h3>${stats.pendientes}</h3>
+                    <p>Pendientes</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #d1fae5; color: #065f46;">✅</div>
+                <div class="stat-info">
+                    <h3>${stats.completados}</h3>
+                    <p>Completados</p>
+                </div>
+            </div>
+        `;
+    }
+
+    actualizarTotalDeudas(deudas) {
+        const total = deudas.reduce((sum, deuda) => sum + parseFloat(deuda.monto_total), 0);
+        document.getElementById('totalDeudas').textContent = `S/ ${total.toFixed(2)}`;
+    }
+
+    filtrarTramites() {
+        const busqueda = document.getElementById('buscarExpediente').value.toLowerCase();
+        const filtroEstado = document.getElementById('filtroEstado').value;
+        
+        // En una implementación real, esto haría una nueva consulta a la API
+        // Por ahora solo mostramos un mensaje
+        if (busqueda || filtroEstado) {
+            this.mostrarToast('Aplicando filtros...', 'info');
+        }
+    }
+
+    // ============================================
+    // MÉTODOS DE UTILIDAD
+    // ============================================
+
+    cambiarTab(event) {
+        const tabId = event.currentTarget.dataset.tab;
+        
+        // Actualizar botones
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        
+        // Actualizar contenido
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        document.getElementById(tabId).classList.add('active');
+    }
+
+    limpiarFormulario() {
+        document.getElementById('formNuevoTramite').reset();
+    }
+
+    validarDNI(dni) {
+        if (dni.length === 8 && /^\d+$/.test(dni)) {
+            this.mostrarToast('✅ DNI válido', 'success');
+            return true;
+        } else if (dni.length > 0) {
+            this.mostrarToast('❌ DNI debe tener 8 dígitos numéricos', 'error');
+            return false;
+        }
+        return null;
+    }
+
+    mostrarModalDetalle(detalle) {
+        document.getElementById('modalContent').innerHTML = `
+            <div style="background: var(--gray-50); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                    <div><small>Expediente:</small><p style="font-weight: 600;">${detalle.numero_expediente}</p></div>
+                    <div><small>Estado:</small><p><span class="badge ${this.obtenerClaseEstado(detalle.estado)}">${detalle.estado}</span></p></div>
+                    <div><small>Tipo:</small><p>${this.formatearTipoTramite(detalle.tipo)}</p></div>
+                    <div><small>Fecha Inicio:</small><p>${new Date(detalle.fecha_inicio).toLocaleDateString()}</p></div>
+                </div>
+            </div>
+            <h3>Historial</h3>
+            <div class="timeline">
+                ${detalle.historial && detalle.historial.length > 0 ? 
+                    detalle.historial.map(item => `
+                        <div class="timeline-item">
+                            <div>
+                                <strong>${item.estado_nuevo}</strong>
+                                <p style="color: var(--gray-600); font-size: 0.9rem; margin-top: 0.25rem;">${new Date(item.fecha).toLocaleString()}</p>
+                                ${item.razon ? `<p style="margin-top: 0.5rem;">${item.razon}</p>` : ''}
+                            </div>
+                        </div>
+                    `).join('') : 
+                    '<p>No hay historial disponible</p>'
+                }
+            </div>
+        `;
+        document.getElementById('modalDetalle').classList.add('active');
+    }
+
+    cerrarModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    mostrarToast(mensaje, tipo = 'info') {
+        const toastContainer = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${tipo}`;
+        
+        const iconos = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+        
+        toast.innerHTML = `
+            <span style="font-size: 1.5rem;">${iconos[tipo]}</span>
+            <div style="flex: 1;">
+                <strong>${tipo.charAt(0).toUpperCase() + tipo.slice(1)}</strong>
+                <p style="margin-top: 0.25rem; font-size: 0.9rem;">${mensaje}</p>
+            </div>
+            <button onclick="this.parentElement.remove()" style="border: none; background: none; cursor: pointer; font-size: 1.2rem;">✕</button>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+    }
+
+    // Métodos de formato y cálculo
+    formatearTipoTramite(tipo) {
+        const tipos = {
+            'LICENCIA_FUNCIONAMIENTO': 'Licencia de Funcionamiento',
+            'PERMISO_CONSTRUCCION': 'Permiso de Construcción',
+            'CERTIFICADO_PARAMETROS': 'Certificado de Parámetros'
+        };
+        return tipos[tipo] || tipo;
+    }
+
+    formatearTipoDeuda(tipo) {
+        const tipos = {
+            'ARBITRIOS': 'Arbitrios Municipales',
+            'MULTA_TRANSITO': 'Multa de Tránsito',
+            'LIMPIEZA_PUBLICA': 'Limpieza Pública'
+        };
+        return tipos[tipo] || tipo;
+    }
+
+    obtenerClaseEstado(estado) {
+        const clases = {
+            'PENDIENTE': 'badge-pending',
+            'EN_REVISION': 'badge-processing',
+            'COMPLETADO': 'badge-completed',
+            'RECHAZADO': 'badge-rejected',
+            'CANCELADO': 'badge-rejected'
+        };
+        return clases[estado] || 'badge-pending';
+    }
+
+    calcularProgreso(estado) {
+        const estados = ['PENDIENTE', 'EN_REVISION', 'COMPLETADO'];
+        const indice = estados.indexOf(estado);
+        return indice >= 0 ? Math.round(((indice + 1) / estados.length) * 100) : 0;
+    }
+
+    obtenerEtapa(estado) {
+        const etapas = {
+            'PENDIENTE': 'Recepción',
+            'EN_REVISION': 'Revisión',
+            'COMPLETADO': 'Finalizado'
+        };
+        return etapas[estado] || estado;
+    }
+
+    estaVencida(fechaVencimiento) {
+        return new Date(fechaVencimiento) < new Date();
+    }
+
+    iniciarActualizacionesAutomaticas() {
+        // Actualizar cada 30 segundos
+        setInterval(async () => {
+            await this.cargarTramites();
+            await this.cargarDeudas();
+        }, 30000);
+    }
+}
+
+// ============================================
+// INICIALIZACIÓN
+// ============================================
+
+// Variable global del controlador
+let controlador;
+
+// Inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    controlador = new ControladorMunicipal();
+});
+
+// Funciones globales para los onclick del HTML
+function limpiarFormulario() {
+    controlador.limpiarFormulario();
+}
+
+function calcularCuotas() {
+    controlador.calcularCuotas();
+}
+
+function procesarPago() {
+    controlador.procesarPago();
+}
+
+function cerrarModal(modalId) {
+    controlador.cerrarModal(modalId);
+}
